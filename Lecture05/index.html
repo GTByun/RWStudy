@@ -5,8 +5,49 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .hwamyeon
+        {
+            width: 300px;
+            height: 500px;
+            margin-left: 80px;
+            float: left;
+            text-align: center;
+        }
+        #hm0
+        {
+            border: 1px solid red;
+        }
+        #hm1
+        {
+            border: 1px solid green;
+        }
+        #hm2
+        {
+            border: 1px solid blue;
+        }
+        .gle
+        {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    
+    <div>하노이의 탑</div><br>
+    <div>
+        <button>초기화</button>
+    </div><br>
+    <div>
+        <div class="hwamyeon" id="hm0">
+            <br><span class="gle">🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥</span><br>
+            <span class="gle">🟨🟨🟨🟨🟨🟨🟨🟨🟨</span><br>
+            <span class="gle">🟩🟩🟩🟩🟩🟩🟩</span><br>
+            <span class="gle">🟦🟦🟦🟦🟦</span><br>
+            <span class="gle">🟪🟪🟪</span><br>
+            <span class="gle">⬛</span>
+        </div>
+        <div class="hwamyeon" id="hm1">second</div>
+        <div class="hwamyeon" id="hm2"></div>
+    </div>
 </body>
 </html>
