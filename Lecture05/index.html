@@ -6,25 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .hwamyeon
+        .location
         {
             width: 300px;
             height: 500px;
             margin-left: 80px;
             float: left;
             text-align: center;
-        }
-        #hm0
-        {
-            border: 1px solid red;
-        }
-        #hm1
-        {
-            border: 1px solid green;
-        }
-        #hm2
-        {
-            border: 1px solid blue;
         }
         .gle
         {
@@ -35,12 +23,12 @@
 <body>
     <div>하노이의 탑</div><br>
     <div>
-        <button onclick="init()">초기화</button>
+        <button onclick="Init()">초기화</button>
     </div><br>
     <div>
-        <div class="hwamyeon" id="hm0">first</div>
-        <div class="hwamyeon" id="hm1">second</div>
-        <div class="hwamyeon" id="hm2">third</div>
+        <div class="location" style="border: 1px solid red;" onclick="Lc0()">first</div>
+        <div class="location" style="border: 1px solid green;" onclick="Lc1()">second</div>
+        <div class="location" style="border: 1px solid blue;" onclick="Lc2()">third</div>
     </div>
     <script src="viewHanoi.js"></script>
 </body>
