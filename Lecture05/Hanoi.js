@@ -1,4 +1,6 @@
 //디자인 파트
+var vocabJSON = fetch("./vocab.json").then(response => {console.log(response.block0); return response.json();});
+console.log(vocabJSON);
 var block0HTML = "🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥";
 var block1HTML = "🟨🟨🟨🟨🟨🟨🟨🟨🟨";
 var block2HTML = "🟩🟩🟩🟩🟩🟩🟩";
