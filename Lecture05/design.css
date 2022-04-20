@@ -1,0 +1,28 @@
+.location
+{
+    width: 300px;
+    height: 500px;
+    margin-left: 80px;
+    float: left;
+    text-align: center;
+}
+#location0
+{
+    border: 1px solid red;
+}
+#location1
+{
+    border: 1px solid green;
+}
+#location2
+{
+    border: 1px solid blue;
+}
+.floor
+{
+    display: block;
+}
+#locationN
+{
+    border: 1px solid white;
+}
