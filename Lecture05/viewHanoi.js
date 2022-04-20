@@ -31,7 +31,7 @@ function Restoration()
 
 function RefreshConcat(string)
 {
-    return "<span class='gle'>" + string + "</span><br>"
+    return "<span style='display: block;'>" + string + "</span><br>"
 }
 
 function Refresh(type)
