@@ -1,11 +1,11 @@
 {
-    "block0" : "🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥",
-    "block1" : "🟨🟨🟨🟨🟨🟨🟨🟨🟨",
-    "block2" : "🟩🟩🟩🟩🟩🟩🟩",
-    "block3" : "🟦🟦🟦🟦🟦",
-    "block4" : "🟪🟪🟪",
-    "block5" : "⬛",
-    "warningSelectNull" : "이 칸은 비었습니다!",
-    "warningSelectSame" : "같은 칸을 선택할 수 없습니다!",
-    "warningPutBigBlockOnSmallBlock" : "큰 블록은 작은 블록 위에 올릴 수 없습니다!"
-}
+    "block": ["🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥",
+        "🟨🟨🟨🟨🟨🟨🟨🟨🟨", 
+        "🟩🟩🟩🟩🟩🟩🟩",
+        "🟦🟦🟦🟦🟦",
+        "🟪🟪🟪",
+        "⬛"],
+    "warningSelectNull": "이 칸은 비었습니다!",
+    "warningSelectSame": "같은 칸을 선택할 수 없습니다!",
+    "warningPutBigBlockOnSmallBlock": "큰 블록은 작은 블록 위에 올릴 수 없습니다!"
+} 
