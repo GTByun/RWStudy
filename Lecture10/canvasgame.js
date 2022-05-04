@@ -1,5 +1,14 @@
 var canvas = document.getElementById("game");
+var context = canvas.getContext("2d");
 
+function objDraw(x, y, size, color)
+{
+    context.beginPath();
+    context.arc(x - size, y - size, size, 0, 2 * Math.PI);
+    context.fillStyle = color;
+    context.fill();
+    context.closePath();
+}
 
 class player
 {
@@ -12,12 +21,7 @@ class player
     }
     draw()
     {
-        var context = canvas.getContext("2d");
-        context.beginPath();
-        context.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
-        context.fillStyle = this.color;
-        context.fill();
-        context.closePath();
+        objDraw(this.x, this.y, this.size, this.color);
     }
 }
 
@@ -32,16 +36,7 @@ class bullet
     }
     draw()
     {
-        var context = canvas.getContext("2d");
-        context.beginPath();
-        context.arc(this.x - this.size, this.y - this.size, this.size, 0, 2 * Math.PI);
-        context.fillStyle = this.color;
-        context.fill();
-        context.closePath();
-    }
-    Move()
-    {
-        y--;
+        objDraw(this.x, this.y, this.size, this.color);
     }
 }
 
