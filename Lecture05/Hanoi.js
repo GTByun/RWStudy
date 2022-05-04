@@ -13,9 +13,9 @@ rawFile.onreadystatechange = function() {
         {
             blockHTML.push(data.block[i]);
         }
-        warning.SelectNull = data.warningSelectNull;
-        warning.SelectSame = data.warningSelectSame;
-        warning.PutBigBlockOnSmallBlock = data.warningPutBigBlockOnSmallBlock;
+        warning.SelectNull = data.warning.SelectNull;
+        warning.SelectSame = data.warning.SelectSame;
+        warning.PutBigBlockOnSmallBlock = data.warning.PutBigBlockOnSmallBlock;
     }
 }
 rawFile.send(null);
