@@ -53,6 +53,21 @@ class bullet
     }
 }
 
+class Enemy
+{
+    constructor(x, y, hp, speed)
+    {
+        this.x = x;
+        this.y = y;
+        this.hp = hp;
+        this.speed = speed;
+    }
+    Move()
+    {
+        
+    }
+}
+
 class GameManager
 {
     static Input()
