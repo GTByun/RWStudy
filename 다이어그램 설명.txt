@@ -1,0 +1,49 @@
+-GameManager
+[ValueList]
+Player : 플레이어 클래스를 담아두는 변수
+PlayerBullet[] : 플레이어 탄을 담아두는 배열 변수
+Enemy[] : 적을 담아두는 배열 변수
+keyboardEvent : 키보드가 눌린 상태인지 인식하는 배열 변수
+[Constructor]
+1. 플레이어, 적 배열, 탄 배열, 키보드 이벤트를 생성하고
+2. 마우스, 키보드 관련 이벤트리스너를 생성한다.
+[Input()] : 키보드 입력을 확인하고 플레이어를 이동시킨다
+[Update()]
+1. 적을 생성하고
+2. 적, 탄을 움직여준 뒤에 완전히 바깥으로 나갔을 때 제거해주고
+3. 적이 탄에 맞았을 때 탄을 제거해주고
+4. 적의 HP가 0이라면 적을 제거해주고
+[Draw()] : 탄 -> 아군 -> 적 순서로 그려준다
+[Loop()] : 인터벌로 작동되고 Input() -> Update() -> Draw() 순서로 루프를 실행한다
+
+-Player
+[ValueList]
+x : x좌표 변수
+y : y좌표 변수
+speed : 이속 변수
+size : 그려질 때의 크기 변수
+Context : 캔버스 컨텍스트 변수
+[Draw()] : 플레이어를 그린다
+
+-Enemy
+[ValueList]
+x : x좌표 변수
+y : y좌표 변수
+hp : 그려질 때 크기, hp 변수
+speed : 이속 변수
+Context : 캔버스 컨텍스트 변수
+[Draw()] : 적을 그린다
+[Move(Player)] : 플레이어 방향으로 이동한다
+[int IsHit(PlayerBullet[])] : 탄에 맞았는지를 확인하고 맞은 탄의 종류를 출력한다.
+
+-PlayerBullet
+[ValueList]
+x : x좌표 변수
+y : y좌표 변수
+speed : 이속 변수
+size : 그려질 때의 크기 변수
+xMove : 이동 벡터 x값 변수
+yMove : 이동 벡터 y값 변수
+Context : 캔버스 컨텍스트 변수
+[Draw()] : 탄을 그린다
+[Move()] : xMove와 yMove에 따라 이동한다
