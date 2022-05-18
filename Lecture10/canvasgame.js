@@ -4,7 +4,6 @@ var width = canvas.width;
 var height = canvas.height;
 var halfWidth = canvas.width / 2;
 var halfHeight = canvas.height / 2;
-keyboardEvent = {Left: false, Right: false, Up: false, Down: false};
 
 function ObjDraw(x, y, size, color)
 {
@@ -64,45 +63,26 @@ class Enemy
     }
     Move()
     {
-        
+
     }
 }
 
 class GameManager
 {
-    static Input()
+    constructor()
     {
-        if (keyboardEvent.Down)
-        {
-            if (p.y < height - p.size)
-            {
-                p.y += p.speed;
-            }
-        }
-        if (keyboardEvent.Up)
-        {
-            if (p.y > p.size)
-            {
-                p.y -= p.speed;
-            }
-        }
-        if (keyboardEvent.Right)
-        {
-            if (p.x < width - p.size)
-            {
-                p.x += p.speed;
-            }
-        }
-        if (keyboardEvent.Left)
-        {
-            if (p.x > p.size)
-            {
-                p.x -= p.speed;
-            }
+        canvas.onclick = function(event){
+            const x = event.clientX;
+            const y = event.clientY;
+            var xMove = x - p.x, yMove = y - p.y;
+            var distance = Math.sqrt(Math.pow(xMove, 2) + Math.pow(yMove, 2));
+            xMove /= distance;
+            yMove /= distance;
+            b.push(new bullet(p.x, p.y, 8, xMove, yMove, 5));
         }
     }
 
-    static Update()
+    Update()
     {
         for (let index = 0; index < b.length; index++)
         {
@@ -116,7 +96,7 @@ class GameManager
             
     }
 
-    static Draw()
+    Draw()
     {
         context.clearRect(0, 0, canvas.width, canvas.height);
         for (let index = 0; index < b.length; index++)
@@ -126,66 +106,18 @@ class GameManager
 
     Loop()
     {
-        GameManager.Input();
-        GameManager.Update();
-        GameManager.Draw();
+        gm.Update();
+        gm.Draw();
     }
 }
-p = new player(320, 240, 15, 3);
-b = [];
-e = [];
-canvas.onclick = function(event){
-    const x = event.clientX;
-    const y = event.clientY;
-    var xMove = x - p.x, yMove = y - p.y;
-    var distance = Math.sqrt(Math.pow(xMove, 2) + Math.pow(yMove, 2));
-    xMove /= distance;
-    yMove /= distance;
-    b.push(new bullet(p.x, p.y, 8, xMove, yMove, 5));
-}
-
-window.onkeydown = function(event){
-    var key = event.key;
-    switch (key)
-    {
-        case "ArrowUp":
-            keyboardEvent.Up = true;
-            break;
-        case "ArrowDown":
-            keyboardEvent.Down = true;
-            break;
-        case "ArrowLeft":
-            keyboardEvent.Left = true;
-            break;
-        case "ArrowRight":
-            keyboardEvent.Right = true;
-            break;
-        default:
-            break;
-        
-    }
-}
-window.onkeyup = function(event){
-    var key = event.key;
-    switch (key)
-    {
-        case "ArrowUp":
-            keyboardEvent.Up = false;
-            break;
-        case "ArrowDown":
-            keyboardEvent.Down = false;
-            break;
-        case "ArrowLeft":
-            keyboardEvent.Left = false;
-            break;
-        case "ArrowRight":
-            keyboardEvent.Right = false;
-            break;
-        default:
-            break;
-        
-    }
-}
+var p = new player(320, 240, 15, 3);
+var b = [];
+var e = [];
 
 var gm = new GameManager();
-var loop = setInterval(gm.Loop , 1000 / 60);
+function Loop()
+{
+    gm.Update();
+    gm.Draw();
+}
+var loop = setInterval(gm.Loop, 1000 / 60);
