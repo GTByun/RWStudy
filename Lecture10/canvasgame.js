@@ -1,6 +1,5 @@
 class Vector
 {
-    static null = new Vector(null, null);
     static zero = new Vector(0, 0);
 
     constructor(x, y)
