@@ -427,4 +427,4 @@ class GameManager
 }
 
 var gm = new GameManager();
-var loop = setInterval(() => { gm.Loop(); }, 1000 / 60);
+var loop = setInterval(() => { gm.Loop(); }, 1000 / 60); 
