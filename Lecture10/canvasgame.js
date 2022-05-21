@@ -1,6 +1,7 @@
 class Vector
 {
     static zero = new Vector(0, 0);
+    static center = new Vector(document.getElementById("game").width, document.getElementById("game").height).CalScalar("/", 2);
 
     constructor(x, y)
     {
@@ -54,6 +55,46 @@ class Vector
         }
     }
 
+
+    Adj(operator, scalar, element)
+    {
+        if (!(element == "x" || element == "y"))
+        {
+            console.error("Adj: Element Error!");
+            return null;
+        }
+        switch (operator)
+        {
+            case "+":
+                switch (element)
+                {
+                    case "x":
+                        return new Vector(this.x + scalar, this.y);
+                    case "y":
+                        return new Vector(this.x, this.y + scalar);
+                }
+            case "-":
+                switch (element)
+                {
+                    case "x":
+                        return new Vector(this.x - scalar, this.y);
+                    case "y":
+                        return new Vector(this.x, this.y - scalar);
+                }
+            case "=":
+                switch (element)
+                {
+                    case "x":
+                        return new Vector(scalar, this.y);
+                    case "y":
+                        return new Vector(this.x, scalar);
+                }
+            default:
+                console.error("Adj: Operator Error!");
+                return null;
+        }
+    }
+
     DistanceFromZero()
     {
         var pow = Math.pow;
@@ -95,15 +136,14 @@ class Canvas
     static context = this.self.getContext("2d");
     static width = this.self.width;
     static height = this.self.height;
-    static width_Half = this.width / 2;
-    static height_Half = this.height / 2;
-    static collider = new BoxCollider(new Vector(-this.width_Half, -this.height_Half), new Vector(this.width_Half, this.height_Half));
-    static position = new Vector(this.width_Half, this.height_Half);
+    static collider = new BoxCollider(Vector.center.CalScalar("*", -1), Vector.center);
+    static position = Vector.center;
     
-    static FontReset()
+    static TextMode(align, baseline)
     {
-        Canvas.context.textBaseline = "middle";
-        Canvas.context.textAlign = "center";
+        var context = Canvas.context
+        context.textAlign = align != null ? align : "center";
+        context.textBaseline = baseline != null ? baseline : "middle";
     }
 }
 
@@ -128,6 +168,11 @@ class Draw
         return "#" + Hex2(red) + Hex2(green) + Hex2(blue);
     }
 
+    static Clear()
+    {
+        Canvas.context.clearRect(0, 0, Canvas.width, Canvas.height);
+    }
+
     static Circle(position, size, color)
     {
         var context = Canvas.context;
@@ -138,7 +183,7 @@ class Draw
         context.closePath();
     }
 
-    static Font(position, string, font, color)
+    static Text(position, string, font, color)
     {
         var context = Canvas.context;
         context.font = font;
@@ -149,19 +194,24 @@ class Draw
 
 class Random
 {
-    static RandomInt(limit)
+    static Int(limit)
     {
         return Math.floor(Math.random() * limit);
     }
 
-    static Random(limit)
+    static IntRange(min, max)
+    {
+        return Random.Int(max - min) + min;
+    }
+
+    static Float(limit)
     {
         return Math.random() * limit;
     }
 
-    static RandomBool()
+    static Bool()
     {
-        return Random.RandomInt(3) == 1 ? true : false;
+        return Random.Int(2) == 1 ? true : false;
     }
 }
 
@@ -214,7 +264,7 @@ class Enemy
         this.size = hp * this.sizeTimes;
         this.collider = new CircleCollider(this.size);
         this.velocity = player.position.CalVector("-", this.position).Normalization().CalScalar("*", speed)
-        var RandomColor = function() { return Random.RandomInt(230) };
+        var RandomColor = function() { return Random.Int(230) };
         this.color = Draw.RGB(RandomColor(), RandomColor(), RandomColor());
     }
 
@@ -227,6 +277,7 @@ class Enemy
     Draw()
     {
         Draw.Circle(this.position, this.size, this.color);
+        Draw.Text(this.position.Adj("-", this.size + 10, "y"), this.hp, "18px serif");
     }
 
     Move()
@@ -242,7 +293,7 @@ class Collider
         return collider instanceof type;
     }
 
-    static MakeRealCollider(obj) //private
+    static MakeReal(obj) //private
     {
         var collider = obj.collider;
         var position = obj.position;
@@ -278,21 +329,21 @@ class Collider
             console.error("Overlap_BoxNCircle: Type Error!");
             return null;
         }
-        var MakeRealCollider = Collider.MakeRealCollider;
+        var MakeRealCollider = Collider.MakeReal;
         var boxCollider = MakeRealCollider(boxObj), circleCollider = MakeRealCollider(circleObj);
         var boxStart = boxCollider.start, boxEnd = boxCollider.end;
+        var size = circleCollider.size;
         var range = [,];
-        range[0] = new BoxCollider(new Vector(boxStart.x - circleCollider.size, boxStart.y), new Vector(boxEnd.x + circleCollider.size, boxEnd.y));
-        range[1] = new BoxCollider(new Vector(boxStart.x, boxStart.y - circleCollider.size), new Vector(boxEnd.x, boxEnd.y + circleCollider.x));
+        range[0] = new BoxCollider(boxStart.Adj("-", size, "x"), boxEnd.Adj("+", size, "x"));
+        range[1] = new BoxCollider(boxStart.Adj("-", size, "y"), boxEnd.Adj("+", size, "y"));
         var condition = [,];
         condition[0] = false;
         for (let i = 0; i < range.length; i++)
             condition[0] = condition[0] || Collider.InBoxCollider_Point(range[i], circleCollider.offset);
-        var points = [,,,];
-        points[0] = boxStart;
-        points[1] = new Vector(boxEnd.x, boxStart.y);
-        points[2] = new Vector(boxStart.x, boxEnd.y);
-        points[3] = boxEnd;
+        var points = [boxStart,
+            boxStart.Adj("=", boxEnd.x, "x"),
+            boxStart.Adj("=", boxEnd.y, "y"),
+            boxEnd];
         condition[1] = false;
         for (let i = 0; i < points.length; i++)
             condition[1] = condition[1] || Collider.InCircleCollider_Point(circleCollider, points[i]);
@@ -307,8 +358,8 @@ class Collider
             console.error("Overlap_CircleNCircle: Type Error!");
             return null;
         }
-        var MakeRealCollider = Collider.MakeRealCollider;
-        var colliderA = MakeRealCollider(objA), colliderB = MakeRealCollider(objB);
+        var MakeReal = Collider.MakeReal;
+        var colliderA = MakeReal(objA), colliderB = MakeReal(objB);
         return colliderA.offset.CalVector("-", colliderB.offset).DistanceFromZero() <= colliderA.size + colliderB.size;
     }
 }
@@ -317,7 +368,7 @@ class GameManager
 {
     constructor()
     {
-        this.player = new Player(new Vector(Canvas.width_Half, Canvas.height_Half), 15);
+        this.player = new Player(Vector.center, 25);
         this.bullets = [];
         this.enemies = [];
         this.Create = function(objtype, what) { objtype.push(what); };
@@ -325,37 +376,51 @@ class GameManager
         Canvas.self.onclick = function(event){
             var playerPos = gm.player.position;
             var direction = new Vector(event.clientX, event.clientY).CalVector("-", playerPos).Normalization();
-            gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 8, direction, 5, 1));
+            gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 8, direction, 10, 1));
         }
-        this.Random = Random.Random;
-        this.Precentage = function(percent) { return this.Random(100) < percent; };
-        this.RandomBool = Random.RandomBool;
-        this.Overlap_BoxNCircle = Collider.Overlap_BoxNCircle;
-        this.Overlap_CircleNCircle = Collider.Overlap_CircleNCircle;
-        Canvas.FontReset();
+        this.Precentage = function(percent) { return Random.Float(100) < percent; };
         this.score = 0;
         this.gameover = false;
         this.difficult = 0;
         this.difficultUp = 1 / 600;
-        this.start = new Date();
     }
 
     Update()
     {
-        var times = 1 + this.difficult / 10;
+        var times = 1 + this.difficult * 0.1;
         if (!this.gameover)
         {
-            if (this.Precentage((5 + this.difficult) / this.enemies.length))
+            if (this.Precentage((2 + this.difficult) / (this.enemies.length + 1)))
             {
-                var EnemyHP = Random.RandomInt(10);
-                var EnemySize = EnemyHP * 3;
-                var width = Canvas.width, height = Canvas.height;
-                var x = this.Random(width), y = this.Random(height);
-                if (this.RandomBool())
-                    x = this.RandomBool() ? -EnemySize : width + EnemySize;
+                var type;
+                if (Random.Bool())
+                {
+                    if (Random.Bool())
+                        type = 1;
+                    else
+                        type = 2;
+                }
                 else
-                    y = this.RandomBool() ? -EnemySize : height + EnemySize;
-                this.Create(this.enemies, new Enemy(new Vector(x, y), Math.floor(EnemyHP * times), 5 / EnemyHP * times, this.player));
+                {
+                    type = 0;
+                    times -= this.difficult * 0.05;
+                }
+                var enemyHP = type != 0 ?
+                type == 1 ? Math.floor(Random.IntRange(7, 11) * times) : Random.IntRange(1, 4)
+                : Math.floor(Random.IntRange(4, 7) * times);
+                var enemySize = enemyHP * Enemy.sizeTimes;
+                var enemySpeed =  type != 0 ?
+                type == 1 ? 3 / enemyHP : 5 - ((enemyHP - 1) * 0.5) * times
+                : 4 / enemyHP * times;
+                var enemySize = enemyHP * Enemy.sizeTimes;
+                var width = Canvas.width, height = Canvas.height;
+                var x = Random.Float(width), y = Random.Float(height);
+                if (Random.Bool())
+                    x = Random.Bool() ? -enemySize : width + enemySize;
+                else
+                    y = Random.Bool() ? -enemySize : height + enemySize;
+                this.Create(this.enemies, new Enemy(new Vector(x,y), enemyHP, enemySpeed, this.player));
+                
             }
             for (let i = 0; i < this.enemies.length; i++)
             {
@@ -364,7 +429,7 @@ class GameManager
                 for (let j = 0; j < this.bullets.length; j++)
                 {
                     var bullet = this.bullets[j];
-                    if (this.Overlap_CircleNCircle(enemy, bullet))
+                    if (Collider.Overlap_CircleNCircle(enemy, bullet))
                     {
                         enemy.hp -= bullet.damage;
                         this.Remove(this.bullets, j);
@@ -379,9 +444,8 @@ class GameManager
                     continue;
                 }
                 enemy.UpdateSize();
-                if (this.Overlap_CircleNCircle(enemy, this.player))
+                if (Collider.Overlap_CircleNCircle(enemy, this.player))
                 {
-                    console.log((new Date() - this.start) / 1000);
                     this.gameover = true;
                     this.gameoverScore = "Score: " + this.score.toString();
                 }
@@ -391,7 +455,7 @@ class GameManager
             {
                 var bullet = this.bullets[i];
                 bullet.Move();
-                if (!this.Overlap_BoxNCircle(Canvas, bullet))
+                if (!Collider.Overlap_BoxNCircle(Canvas, bullet))
                 {
                     this.Remove(this.bullets, i);
                     i--;
@@ -403,19 +467,23 @@ class GameManager
 
     Draw()
     {
-        Canvas.context.clearRect(0, 0, Canvas.width, Canvas.height);
+        Draw.Clear();
         if (!this.gameover)
         {
             for (let i = 0; i < this.bullets.length; i++)
                 this.bullets[i].Draw();
+            Canvas.TextMode();
             for (let i = 0; i < this.enemies.length; i++)
                 this.enemies[i].Draw();
             this.player.Draw();
+            Canvas.TextMode("start", "top");
+            Draw.Text(Vector.zero.CalScalar("+", 15), "Score: " + this.score.toString(), "24px serif");
         }
         else
         {
-            Draw.Font(new Vector(Canvas.width_Half, Canvas.height_Half), "Game Over!", "48px serif");
-            Draw.Font(new Vector(Canvas.width_Half, Canvas.height_Half + 100), this.gameoverScore, "24px serif");
+            Canvas.TextMode();
+            Draw.Text(Vector.center, "Game Over!", "48px serif");
+            Draw.Text(Vector.center.Adj("+", 100, "y"), this.gameoverScore, "24px serif");
         }
     }
 
@@ -427,4 +495,4 @@ class GameManager
 }
 
 var gm = new GameManager();
-var loop = setInterval(() => { gm.Loop(); }, 1000 / 60); 
+var loop = setInterval(() => { gm.Loop(); }, 1000 / 60);
