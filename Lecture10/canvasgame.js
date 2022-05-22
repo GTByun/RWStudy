@@ -256,14 +256,51 @@ class Enemy
 {
     static sizeTimes = 6;
 
-    constructor(position, hp, speed, player)
+    Tanker(player)
     {
-        this.position = position;
+        this.hp = Math.floor(Random.IntRange(7, 11) * gm.times);
+        var speed = 1.5 / this.hp;
+        this.Default(player, speed);
+        return this;
+    }
+
+    Runner(player)
+    {
+        this.hp = Random.IntRange(1, 4);
+        var speed = (5 - ((this.hp - 1) * 0.5)) * gm.times;
+        this.Default(player, speed);
+        return this;
+    }
+
+    Grunt(player)
+    {
+        var times = gm.times - gm.difficult * 0.05;
+        this.hp = Math.floor(Random.IntRange(4, 7 * times));
+        var speed = 4 / this.hp * times;
+        this.Default(player, speed);
+        return this;
+    }
+
+    Custom(player, hp, speed)
+    {
         this.hp = hp;
+        var _speed = speed != null ? speed : 4 / this.hp * (gm.times - gm.difficult * 0.05);
+        this.Default(player, _speed);
+    }
+
+    Default(player, speed)
+    {
         this.sizeTimes = Enemy.sizeTimes;
-        this.size = hp * this.sizeTimes;
+        this.size = this.hp * this.sizeTimes;
+        var width = Canvas.width, height = Canvas.height;
+        var x = Random.Float(width), y = Random.Float(height);
+        if (Random.Bool())
+            x = Random.Bool() ? -this.size : width + this.size;
+        else
+            y = Random.Bool() ? -this.size : height + this.size;
+        this.position = new Vector(x, y);
         this.collider = new CircleCollider(this.size);
-        this.velocity = player.position.CalVector("-", this.position).Normalization().CalScalar("*", speed)
+        this.velocity = player.position.CalVector("-", this.position).Normalization().CalScalar("*", speed);
         var RandomColor = function() { return Random.Int(230) };
         this.color = Draw.RGB(RandomColor(), RandomColor(), RandomColor());
     }
@@ -387,40 +424,20 @@ class GameManager
 
     Update()
     {
-        var times = 1 + this.difficult * 0.1;
+        this.times = 1 + this.difficult * 0.1;
         if (!this.gameover)
         {
             if (this.Precentage((2 + this.difficult) / (this.enemies.length + 1)))
             {
-                var type;
                 if (Random.Bool())
                 {
                     if (Random.Bool())
-                        type = 1;
+                        this.Create(this.enemies, new Enemy().Tanker(this.player));
                     else
-                        type = 2;
+                        this.Create(this.enemies, new Enemy().Runner(this.player));
                 }
                 else
-                {
-                    type = 0;
-                    times -= this.difficult * 0.05;
-                }
-                var enemyHP = type != 0 ?
-                type == 1 ? Math.floor(Random.IntRange(7, 11) * times) : Random.IntRange(1, 4)
-                : Math.floor(Random.IntRange(4, 7) * times);
-                var enemySize = enemyHP * Enemy.sizeTimes;
-                var enemySpeed =  type != 0 ?
-                type == 1 ? 3 / enemyHP : 5 - ((enemyHP - 1) * 0.5) * times
-                : 4 / enemyHP * times;
-                var enemySize = enemyHP * Enemy.sizeTimes;
-                var width = Canvas.width, height = Canvas.height;
-                var x = Random.Float(width), y = Random.Float(height);
-                if (Random.Bool())
-                    x = Random.Bool() ? -enemySize : width + enemySize;
-                else
-                    y = Random.Bool() ? -enemySize : height + enemySize;
-                this.Create(this.enemies, new Enemy(new Vector(x,y), enemyHP, enemySpeed, this.player));
-                
+                    this.Create(this.enemies, new Enemy().Grunt(this.player));
             }
             for (let i = 0; i < this.enemies.length; i++)
             {
