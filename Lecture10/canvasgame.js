@@ -370,18 +370,15 @@ class Collider
         var boxCollider = MakeRealCollider(boxObj), circleCollider = MakeRealCollider(circleObj);
         var boxStart = boxCollider.start, boxEnd = boxCollider.end;
         var size = circleCollider.size;
-        var range = [,];
-        range[0] = new BoxCollider(boxStart.Adj("-", size, "x"), boxEnd.Adj("+", size, "x"));
-        range[1] = new BoxCollider(boxStart.Adj("-", size, "y"), boxEnd.Adj("+", size, "y"));
-        var condition = [,];
-        condition[0] = false;
+        var condition = [false, false];
+        var range = [new BoxCollider(boxStart.Adj("-", size, "x"), boxEnd.Adj("+", size, "x")),
+            new BoxCollider(boxStart.Adj("-", size, "y"), boxEnd.Adj("+", size, "y"))];
         for (let i = 0; i < range.length; i++)
             condition[0] = condition[0] || Collider.InBoxCollider_Point(range[i], circleCollider.offset);
         var points = [boxStart,
             boxStart.Adj("=", boxEnd.x, "x"),
             boxStart.Adj("=", boxEnd.y, "y"),
             boxEnd];
-        condition[1] = false;
         for (let i = 0; i < points.length; i++)
             condition[1] = condition[1] || Collider.InCircleCollider_Point(circleCollider, points[i]);
         return condition[0] || condition[1];
@@ -411,9 +408,12 @@ class GameManager
         this.Create = function(objtype, what) { objtype.push(what); };
         this.Remove = function(objtype, at) { objtype.splice(at, 1); };
         Canvas.self.onclick = function(event){
-            var playerPos = gm.player.position;
-            var direction = new Vector(event.clientX, event.clientY).CalVector("-", playerPos).Normalization();
-            gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 8, direction, 10, 1));
+            if (!gm.gameover)
+            {
+                var playerPos = gm.player.position;
+                var direction = new Vector(event.clientX, event.clientY).CalVector("-", playerPos).Normalization();
+                gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 8, direction, 10, 1));
+            }
         }
         this.Precentage = function(percent) { return Random.Float(100) < percent; };
         this.score = 0;
