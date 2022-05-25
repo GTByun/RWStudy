@@ -149,8 +149,6 @@ class Canvas
 
 class Cal
 {
-    static PI = Math.PI;
-
     static Dec2Hex(dec, digit)
     {
         let result = dec.toString(16);
@@ -177,7 +175,7 @@ class Draw
     {
         const context = Canvas.context;
         context.beginPath();
-        context.arc(position.x, position.y, size, 0, 2 * Cal.PI);
+        context.arc(position.x, position.y, size, 0, 2 * Math.PI);
         context.fillStyle = color;
         context.fill();
         context.closePath();
