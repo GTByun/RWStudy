@@ -254,7 +254,7 @@ class Bullet extends MyObject
     }
 }
 
-class EnemyNew extends MyObject
+class Enemy extends MyObject
 {
     static sizeTimes = 6;
 
@@ -287,7 +287,7 @@ class EnemyNew extends MyObject
     }
 }
 
-class Tanker extends EnemyNew
+class Tanker extends Enemy
 {
     constructor(player, times)
     {
@@ -297,7 +297,7 @@ class Tanker extends EnemyNew
     }
 }
 
-class Runner extends EnemyNew
+class Runner extends Enemy
 {
     constructor(player, times)
     {
@@ -307,7 +307,7 @@ class Runner extends EnemyNew
     }
 }
 
-class Grunt extends EnemyNew
+class Grunt extends Enemy
 {
     constructor(player, times)
     {
