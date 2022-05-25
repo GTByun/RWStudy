@@ -97,7 +97,7 @@ class Vector
 
     DistanceFromZero()
     {
-        var pow = Math.pow;
+        const pow = Math.pow;
         return Math.sqrt(pow(this.x, 2) + pow(this.y, 2));
     }
 
@@ -141,7 +141,7 @@ class Canvas
     
     static TextMode(align, baseline)
     {
-        var context = Canvas.context
+        const context = Canvas.context
         context.textAlign = align != null ? align : "center";
         context.textBaseline = baseline != null ? baseline : "middle";
     }
@@ -153,7 +153,7 @@ class Cal
 
     static Dec2Hex(dec, digit)
     {
-        var result = dec.toString(16);
+        let result = dec.toString(16);
         for (let index = result.length; index < digit; index++)
             result = "0" + result;
         return result;
@@ -164,7 +164,7 @@ class Draw
 {
     static RGB(red, green, blue)
     {
-        var Hex2 = function(dec) { return Cal.Dec2Hex(dec, 2); };
+        const Hex2 = function(dec) { return Cal.Dec2Hex(dec, 2); };
         return "#" + Hex2(red) + Hex2(green) + Hex2(blue);
     }
 
@@ -175,7 +175,7 @@ class Draw
 
     static Circle(position, size, color)
     {
-        var context = Canvas.context;
+        const context = Canvas.context;
         context.beginPath();
         context.arc(position.x, position.y, size, 0, 2 * Cal.PI);
         context.fillStyle = color;
@@ -185,7 +185,7 @@ class Draw
 
     static Text(position, string, font, color)
     {
-        var context = Canvas.context;
+        const context = Canvas.context;
         context.font = font;
         context.fillStyle = color == null ? "black" : color;
         context.fillText(string, position.x, position.y);
@@ -215,111 +215,105 @@ class Random
     }
 }
 
-class Player
+class MyObject
 {
-    constructor(position, size)
+    constructor(position, size, color, direction, speed)
     {
         this.position = position;
         this.size = size;
-        this.collider = new CircleCollider(this.size);
-    }
-
-    Draw()
-    {
-        Draw.Circle(this.position, this.size, "blue");
-    }
-}
-
-class Bullet
-{
-    constructor(position, size, direction, speed, damage)
-    {
-        this.position = position;
-        this.size = size;
+        this.color = color;
         this.collider = new CircleCollider(this.size);
         this.velocity = direction.CalScalar("*", speed);
-        this.damage = damage;
-    }
-
-    Draw()
-    {
-        Draw.Circle(this.position, this.size, "red");
-    }
-
-    Move()
-    {
-        this.position.CalVectorKeep("+", this.velocity);
-    }
-}
-
-class Enemy
-{
-    static sizeTimes = 6;
-
-    Tanker(player)
-    {
-        this.hp = Math.floor(Random.IntRange(7, 11) * gm.times);
-        var speed = 1.5 / this.hp;
-        this.Default(player, speed);
-        return this;
-    }
-
-    Runner(player)
-    {
-        this.hp = Random.IntRange(1, 4);
-        var speed = (5 - ((this.hp - 1) * 0.5)) * gm.times;
-        this.Default(player, speed);
-        return this;
-    }
-
-    Grunt(player)
-    {
-        var times = gm.times - gm.difficult * 0.05;
-        this.hp = Math.floor(Random.IntRange(4, 7 * times));
-        var speed = 4 / this.hp * times;
-        this.Default(player, speed);
-        return this;
-    }
-
-    Custom(player, hp, speed)
-    {
-        this.hp = hp;
-        var _speed = speed != null ? speed : 4 / this.hp * (gm.times - gm.difficult * 0.05);
-        this.Default(player, _speed);
-    }
-
-    Default(player, speed)
-    {
-        this.sizeTimes = Enemy.sizeTimes;
-        this.size = this.hp * this.sizeTimes;
-        var width = Canvas.width, height = Canvas.height;
-        var x = Random.Float(width), y = Random.Float(height);
-        if (Random.Bool())
-            x = Random.Bool() ? -this.size : width + this.size;
-        else
-            y = Random.Bool() ? -this.size : height + this.size;
-        this.position = new Vector(x, y);
-        this.collider = new CircleCollider(this.size);
-        this.velocity = player.position.CalVector("-", this.position).Normalization().CalScalar("*", speed);
-        var RandomColor = function() { return Random.Int(230) };
-        this.color = Draw.RGB(RandomColor(), RandomColor(), RandomColor());
-    }
-
-    UpdateSize()
-    {
-        this.size = this.hp * this.sizeTimes;
-        this.collider.size = this.size;
     }
 
     Draw()
     {
         Draw.Circle(this.position, this.size, this.color);
-        Draw.Text(this.position.Adj("-", this.size + 10, "y"), this.hp, "18px serif");
     }
 
     Move()
     {
         this.position.CalVectorKeep("+", this.velocity);
+    }
+}
+
+class Player extends MyObject
+{
+    constructor(position, size)
+    {
+        super(position, size, "blue", new Vector(0, 0), 0);
+    }
+}
+
+class Bullet extends MyObject
+{
+    constructor(position, size, direction, speed, damage)
+    {
+        super(position, size, "red", direction, speed);
+        this.damage = damage;
+    }
+}
+
+class EnemyNew extends MyObject
+{
+    static sizeTimes = 6;
+
+    constructor(hp, speed, player)
+    {
+        const size = hp * 6;
+        const width = Canvas.width, height = Canvas.height;
+        let x = Random.Float(width), y = Random.Float(height);
+        if (Random.Bool())
+            x = Random.Bool() ? -size : width + size;
+        else
+            y = Random.Bool() ? -size : height + size;
+        const position = new Vector(x, y);
+        const RandomColor = function() { return Random.Int(230) };
+        super(position, size,
+            Draw.RGB(RandomColor(), RandomColor(), RandomColor()),
+            player.position.CalVector("-", position).Normalization(), speed);
+        this.hp = hp;
+    }
+
+    UpdateSize()
+    {
+        this.size = this.hp * 6;
+        this.collider.size = this.size;
+    }
+
+    DrawHP()
+    {
+        Draw.Text(this.position.Adj("-", this.size + 10, "y"), this.hp, "18px serif");
+    }
+}
+
+class Tanker extends EnemyNew
+{
+    constructor(player, times)
+    {
+        const hp = Math.floor(Random.IntRange(7, 11) * times);
+        const speed = 1.5 / hp;
+        super(hp, speed, player);
+    }
+}
+
+class Runner extends EnemyNew
+{
+    constructor(player, times)
+    {
+        const hp = Random.IntRange(1, 4);
+        const speed = (5 - ((hp - 1) * 0.5)) * times;
+        super(hp, speed, player);
+    }
+}
+
+class Grunt extends EnemyNew
+{
+    constructor(player, times)
+    {
+        const hp = Math.floor(Random.IntRange(4, 7 * times));
+        const speed = 4 / hp * times;
+        super(hp, speed, player);
     }
 }
 
@@ -332,9 +326,9 @@ class Collider
 
     static MakeReal(obj) //private
     {
-        var collider = obj.collider;
-        var position = obj.position;
-        var TypeCheck = Collider.TypeCheck;
+        const collider = obj.collider;
+        const position = obj.position;
+        const TypeCheck = Collider.TypeCheck;
         if (TypeCheck(collider, BoxCollider))
             return new BoxCollider(position.CalVector("+", collider.start), position.CalVector("+", collider.end));
         else if (TypeCheck(collider, CircleCollider))
@@ -348,8 +342,8 @@ class Collider
 
     static InBoxCollider_Point(boxCollider, point) //private
     {
-        var xBool = point.x >= boxCollider.start.x && point.x <= boxCollider.end.x;
-        var yBool = point.y >= boxCollider.start.y && point.y <= boxCollider.end.y;
+        const xBool = point.x >= boxCollider.start.x && point.x <= boxCollider.end.x;
+        const yBool = point.y >= boxCollider.start.y && point.y <= boxCollider.end.y;
         return xBool && yBool;
     }
 
@@ -360,22 +354,22 @@ class Collider
 
     static Overlap_BoxNCircle(boxObj, circleObj) //public
     {
-        var TypeCheck = Collider.TypeCheck;
+        const TypeCheck = Collider.TypeCheck;
         if (!TypeCheck(boxObj.collider, BoxCollider) || !TypeCheck(circleObj.collider, CircleCollider))
         {
             console.error("Overlap_BoxNCircle: Type Error!");
             return null;
         }
-        var MakeRealCollider = Collider.MakeReal;
-        var boxCollider = MakeRealCollider(boxObj), circleCollider = MakeRealCollider(circleObj);
-        var boxStart = boxCollider.start, boxEnd = boxCollider.end;
-        var size = circleCollider.size;
-        var condition = [false, false];
-        var range = [new BoxCollider(boxStart.Adj("-", size, "x"), boxEnd.Adj("+", size, "x")),
+        const MakeRealCollider = Collider.MakeReal;
+        const boxCollider = MakeRealCollider(boxObj), circleCollider = MakeRealCollider(circleObj);
+        const boxStart = boxCollider.start, boxEnd = boxCollider.end;
+        const size = circleCollider.size;
+        let condition = [false, false];
+        const range = [new BoxCollider(boxStart.Adj("-", size, "x"), boxEnd.Adj("+", size, "x")),
             new BoxCollider(boxStart.Adj("-", size, "y"), boxEnd.Adj("+", size, "y"))];
         for (let i = 0; i < range.length; i++)
             condition[0] = condition[0] || Collider.InBoxCollider_Point(range[i], circleCollider.offset);
-        var points = [boxStart,
+        const points = [boxStart,
             boxStart.Adj("=", boxEnd.x, "x"),
             boxStart.Adj("=", boxEnd.y, "y"),
             boxEnd];
@@ -386,14 +380,14 @@ class Collider
 
     static Overlap_CircleNCircle(objA, objB) //public
     {
-        var TypeCheck = Collider.TypeCheck;
+        const TypeCheck = Collider.TypeCheck;
         if (!TypeCheck(objA.collider, CircleCollider) || !TypeCheck(objB.collider, CircleCollider))
         {
             console.error("Overlap_CircleNCircle: Type Error!");
             return null;
         }
-        var MakeReal = Collider.MakeReal;
-        var colliderA = MakeReal(objA), colliderB = MakeReal(objB);
+        const MakeReal = Collider.MakeReal;
+        const colliderA = MakeReal(objA), colliderB = MakeReal(objB);
         return colliderA.offset.CalVector("-", colliderB.offset).DistanceFromZero() <= colliderA.size + colliderB.size;
     }
 }
@@ -432,16 +426,16 @@ class GameManager
                 if (Random.Bool())
                 {
                     if (Random.Bool())
-                        this.Create(this.enemies, new Enemy().Tanker(this.player));
+                        this.Create(this.enemies, new Tanker(this.player, this.times));
                     else
-                        this.Create(this.enemies, new Enemy().Runner(this.player));
+                        this.Create(this.enemies, new Runner(this.player, this.times));
                 }
                 else
-                    this.Create(this.enemies, new Enemy().Grunt(this.player));
+                    this.Create(this.enemies, new Grunt(this.player, this.times - this.difficult * 0.05));
             }
             for (let i = 0; i < this.enemies.length; i++)
             {
-                var enemy = this.enemies[i];
+                const enemy = this.enemies[i];
                 enemy.Move();
                 for (let j = 0; j < this.bullets.length; j++)
                 {
@@ -470,7 +464,7 @@ class GameManager
             }
             for (let i = 0; i < this.bullets.length; i++)
             {
-                var bullet = this.bullets[i];
+                const bullet = this.bullets[i];
                 bullet.Move();
                 if (!Collider.Overlap_BoxNCircle(Canvas, bullet))
                 {
@@ -493,6 +487,8 @@ class GameManager
             for (let i = 0; i < this.enemies.length; i++)
                 this.enemies[i].Draw();
             this.player.Draw();
+            for (let i = 0; i < this.enemies.length; i++)
+                this.enemies[i].DrawHP();
             Canvas.TextMode("start", "top");
             Draw.Text(Vector.zero.CalScalar("+", 15), "Score: " + this.score.toString(), "24px serif");
         }
@@ -511,5 +507,5 @@ class GameManager
     }
 }
 
-var gm = new GameManager();
-var loop = setInterval(() => { gm.Loop(); }, 1000 / 60);
+const gm = new GameManager();
+const loop = setInterval(() => { gm.Loop(); }, 1000 / 60);
