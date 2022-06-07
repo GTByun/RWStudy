@@ -276,10 +276,13 @@ class SquereObject
 
 class MyObject
 {
-    constructor(position, size, color, direction, speed)
+    static sizeTimes = 8;
+
+    constructor(position, hp, color, direction, speed)
     {
         this.position = position;
-        this.size = size;
+        this.hp = hp;
+        this.size = hp * MyObject.sizeTimes;
         this.color = color;
         this.collider = new CircleCollider(this.size);
         this.velocity = direction != null ? direction.CalScalar("*", speed) : null;
@@ -294,32 +297,41 @@ class MyObject
     {
         this.position.CalVectorKeep("+", this.velocity);
     }
+
+    UpdateSize()
+    {
+        this.size = this.hp * MyObject.sizeTimes;
+        this.collider.size = this.size;
+    }
+
+    DrawHP()
+    {
+        DrawText(this.position.Adj("-", this.size + 10, "y"), this.hp, "18px serif");
+    }
 }
 
 class Player extends MyObject
 {
-    constructor(position, size)
+    constructor(hp)
     {
-        super(position, size, "blue");
+        super(Vector.center, hp, "blue");
     }
 }
 
 class Bullet extends MyObject
 {
-    constructor(position, size, direction, speed, damage)
+    constructor(position, hp, direction, speed, damage)
     {
-        super(position, size, "red", direction, speed);
+        super(position, hp, "red", direction, speed);
         this.damage = damage;
     }
 }
 
 class Enemy extends MyObject
 {
-    static sizeTimes = 6;
-
     constructor(hp, speed, player)
     {
-        const size = hp * 6;
+        const size = hp * Enemy.sizeTimes;
         let x = RandomFloat(width), y = RandomFloat(height);
         if (RandomBool())
             x = RandomBool() ? -size : width + size;
@@ -327,21 +339,9 @@ class Enemy extends MyObject
             y = RandomBool() ? -size : height + size;
         const position = new Vector(x, y);
         const RandomColor = function() { return RandomInt(230) };
-        super(position, size,
+        super(position, hp,
             RGB(RandomColor(), RandomColor(), RandomColor()),
             player.position.CalVector("-", position).Normalization(), speed);
-        this.hp = hp;
-    }
-
-    UpdateSize()
-    {
-        this.size = this.hp * 6;
-        this.collider.size = this.size;
-    }
-
-    DrawHP()
-    {
-        DrawText(this.position.Adj("-", this.size + 10, "y"), this.hp, "18px serif");
     }
 }
 
@@ -379,19 +379,11 @@ class GameManager
 {
     constructor()
     {
-        this.player = new Player(Vector.center, 25);
+        this.player = new Player(5);
         this.bullets = [];
         this.enemies = [];
         this.Create = function(objtype, what) { objtype.push(what); };
         this.Remove = function(objtype, at) { objtype.splice(at, 1); };
-        canvas.onclick = function(event){
-            if (!gm.gameover)
-            {
-                var playerPos = gm.player.position;
-                var direction = new Vector(event.clientX, event.clientY).CalVector("-", playerPos).Normalization();
-                gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 8, direction, 10, 1));
-            }
-        }
         this.Precentage = function(percent) { return RandomFloat(100) < percent; };
         this.score = 0;
         this.gameover = false;
@@ -440,10 +432,17 @@ class GameManager
                 enemy.UpdateSize();
                 if (ColliderOverlap_CircleNCircle(enemy, this.player))
                 {
-                    this.gameover = true;
-                    this.gameoverScore = "Score: " + this.score.toString();
+                    this.player.hp -= enemy.hp;
+                    this.Remove(this.enemies, i);
+                    i--;
+                    if (this.player.hp <= 0)
+                    {
+                        this.gameover = true;
+                        this.gameoverScore = "Score: " + this.score.toString();
+                        break;
+                    }
+                    this.player.UpdateSize();
                 }
-                    
             }
             for (let i = 0; i < this.bullets.length; i++)
             {
@@ -472,6 +471,7 @@ class GameManager
             this.player.Draw();
             for (let i = 0; i < this.enemies.length; i++)
                 this.enemies[i].DrawHP();
+            this.player.DrawHP();
             TextMode("start", "top");
             DrawText(Vector.zero.CalScalar("+", 15), "Score: " + this.score.toString(), "24px serif");
         }
@@ -491,4 +491,15 @@ class GameManager
 }
 
 const gm = new GameManager();
+canvas.onclick = function(event){
+    if (!gm.gameover)
+    {
+        if (gm.bullets.length < 5)
+        {
+            const playerPos = gm.player.position;
+            const direction = new Vector(event.clientX, event.clientY).CalVector("-", playerPos).Normalization();
+            gm.Create(gm.bullets, new Bullet(playerPos.Copy(), 1, direction, 10, 1));
+        }
+    }
+}
 const loop = setInterval(() => { gm.Loop(); }, 1000 / 60);
